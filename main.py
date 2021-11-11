@@ -19,7 +19,7 @@ def predict_rub_salary(salary_from, salary_to):
 def predict_rub_salary_hh(vacancy):
     salary_delta = vacancy['salary'] 
     if not salary_delta or salary_delta['currency'] != 'RUR':
-        salary = None
+        return None
     else:
         salary_from = salary_delta['from']
         salary_to = salary_delta['to']
@@ -29,7 +29,7 @@ def predict_rub_salary_hh(vacancy):
 
 def predict_rub_salary_sj(vacancy):
     if not vacancy['payment_from'] and not vacancy['payment_to'] or vacancy['currency'] != 'rub':
-        salary = None
+        return None
     else:
         salary_from = vacancy['payment_from']
         salary_to = vacancy['payment_to']
@@ -37,7 +37,7 @@ def predict_rub_salary_sj(vacancy):
     return salary
 
 
-def get_vacancies(language, page, area, period):
+def get_vacancies_hh(language, page, area, period):
     url = 'https://api.hh.ru/vacancies'
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'\
@@ -57,19 +57,19 @@ def get_vacancies(language, page, area, period):
 
 
 def get_language_vacancies_statistics_hh(languages):
-    result = {}
+    language_vacancies_statistics = {}
     for language in languages:
-        vacancies_all_pages = []
+        vacancies = []
         page = 0
         while True:
-            vacancies = get_vacancies(language, page, area=1, period=3)
+            vacancies = get_vacancies_hh(language, page, area=1, period=3)
             pages_number = vacancies['pages']
             if page > pages_number:
                 break
-            vacancies_all_pages.extend(vacancies['items'])
+            vacancies.extend(vacancies['items'])
             page += 1
         vacancies_number = vacancies['found']
-        salaries = [predict_rub_salary_hh(vacancy) for vacancy in vacancies_all_pages]
+        salaries = [predict_rub_salary_hh(vacancy) for vacancy in vacancies]
         salaries = [int(salary) for salary in salaries if salary]
         average_salary = int(mean(salaries))
         language_vacancies_details = {
@@ -77,8 +77,8 @@ def get_language_vacancies_statistics_hh(languages):
             'average_salary': average_salary,
             'vacancies_processed': len(salaries),
         }
-        result[language] = language_vacancies_details
-    return result
+        language_vacancies_statistics[language] = language_vacancies_details
+    return language_vacancies_statistics
 
 
 def get_vacancies_sj(language, page, token, area, period):
@@ -100,19 +100,19 @@ def get_vacancies_sj(language, page, token, area, period):
 
 
 def get_language_vacancies_statistics_sj(languages, token):
-    result = {}
+    language_vacancies_statistics = {}
     for language in languages:
-        vacancies_all_pages = [] 
+        vacancies = [] 
         page = 0
         while True:
             vacancies = get_vacancies_sj(language, page, token, area='Москва', period=0)
             if vacancies:
-                vacancies_all_pages.extend(vacancies['objects'])
+                vacancies.extend(vacancies['objects'])
                 page += 1
                 if not vacancies['more']:
                     break
         vacancies_number = vacancies['total']
-        salaries = [predict_rub_salary_sj(vacancy) for vacancy in vacancies_all_pages]
+        salaries = [predict_rub_salary_sj(vacancy) for vacancy in vacancies]
         salaries = [int(salary) for salary in salaries if salary]
         average_salary = int(mean(salaries))
         language_vacancies_details = {
@@ -120,17 +120,17 @@ def get_language_vacancies_statistics_sj(languages, token):
             'average_salary': average_salary,
             'vacancies_processed': len(salaries),
         }
-        result[language] = language_vacancies_details
-    return result
+        language_vacancies_statistics[language] = language_vacancies_details
+    return language_vacancies_statistics
 
 
 def print_table(result, title):
-    table_data = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
+    table = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     for language, details in result.items():
         row = [language, details['vacancies_found'], details['vacancies_processed'], details['average_salary']]
-        table_data.append(row)
+        table.append(row)
         row = []
-    table = AsciiTable(table_data)
+    table = AsciiTable(table)
     table.title = title
     print(table.table)
 
