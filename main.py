@@ -56,29 +56,36 @@ def get_vacancies_hh(language, page, area, period):
     return response
 
 
-def get_language_vacancies_statistics_hh(languages):
-    language_vacancies_statistics = {}
-    for language in languages:
-        vacancies = []
-        page = 0
-        while True:
-            vacancies = get_vacancies_hh(language, page, area=1, period=3)
+def get_language_vacancies_statistics_hh(language):
+    language_vacancies = []
+    page = 0
+    while True:
+        vacancies = get_vacancies_hh(language, page, area=1, period=3)
+        if vacancies:
             pages_number = vacancies['pages']
+            language_vacancies.extend(vacancies['items'])
+            page += 1
             if page > pages_number:
                 break
-            vacancies.extend(vacancies['items'])
-            page += 1
-        vacancies_number = vacancies['found']
-        salaries = [predict_rub_salary_hh(vacancy) for vacancy in vacancies]
-        salaries = [int(salary) for salary in salaries if salary]
-        average_salary = int(mean(salaries))
+    vacancies_number = vacancies['found']
+    salaries = [predict_rub_salary_hh(vacancy) for vacancy in language_vacancies]
+    salaries = [int(salary) for salary in salaries if salary]
+    average_salary = int(mean(salaries))
+    vacancies_processed = len(salaries)
+    return vacancies_number, average_salary, vacancies_processed
+
+
+def get_languages_vacancies_statistics_hh(languages):
+    languages_vacancies_statistics = {}
+    for language in languages:
+        vacancies_number, average_salary, vacancies_processed = get_language_vacancies_statistics_hh(language)
         language_vacancies_details = {
             'vacancies_found': vacancies_number,
             'average_salary': average_salary,
-            'vacancies_processed': len(salaries),
+            'vacancies_processed': vacancies_processed,
         }
-        language_vacancies_statistics[language] = language_vacancies_details
-    return language_vacancies_statistics
+        languages_vacancies_statistics[language] = language_vacancies_details
+    return languages_vacancies_statistics
 
 
 def get_vacancies_sj(language, page, token, area, period):
@@ -99,29 +106,35 @@ def get_vacancies_sj(language, page, token, area, period):
     return response
 
 
-def get_language_vacancies_statistics_sj(languages, token):
-    language_vacancies_statistics = {}
+def get_language_vacancies_statistics_sj(language, token):
+    language_vacancies = [] 
+    page = 0
+    while True:
+        vacancies = get_vacancies_sj(language, page, token, area='Москва', period=0)
+        if vacancies:
+            language_vacancies.extend(vacancies['objects'])
+            page += 1
+            if not vacancies['more']:
+                break
+    vacancies_number = vacancies['total']
+    salaries = [predict_rub_salary_sj(vacancy) for vacancy in language_vacancies]
+    salaries = [int(salary) for salary in salaries if salary]
+    average_salary = int(mean(salaries))
+    vacancies_processed = len(salaries)
+    return vacancies_number, average_salary, vacancies_processed
+  
+
+def get_languages_vacancies_statistics_sj(languages, token):
+    languages_vacancies_statistics = {}
     for language in languages:
-        vacancies = [] 
-        page = 0
-        while True:
-            vacancies = get_vacancies_sj(language, page, token, area='Москва', period=0)
-            if vacancies:
-                vacancies.extend(vacancies['objects'])
-                page += 1
-                if not vacancies['more']:
-                    break
-        vacancies_number = vacancies['total']
-        salaries = [predict_rub_salary_sj(vacancy) for vacancy in vacancies]
-        salaries = [int(salary) for salary in salaries if salary]
-        average_salary = int(mean(salaries))
+        vacancies_number, average_salary, vacancies_processed = get_language_vacancies_statistics_sj(language, token)
         language_vacancies_details = {
             'vacancies_found': vacancies_number,
             'average_salary': average_salary,
-            'vacancies_processed': len(salaries),
+            'vacancies_processed': vacancies_processed,
         }
-        language_vacancies_statistics[language] = language_vacancies_details
-    return language_vacancies_statistics
+        languages_vacancies_statistics[language] = language_vacancies_details
+    return languages_vacancies_statistics
 
 
 def print_table(result, title):
@@ -140,8 +153,8 @@ def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_TOKEN')
     languages = ['Python', 'JavaScript', 'Java', 'Ruby', 'PHP', 'C++', 'C#', 'C', 'Go']
-    sj_result = get_language_vacancies_statistics_sj(languages, token)
-    hh_result = get_language_vacancies_statistics_hh(languages)
+    sj_result = get_languages_vacancies_statistics_sj(languages, token)
+    hh_result = get_languages_vacancies_statistics_hh(languages)
     print_table(sj_result, 'SuperJob Moscow')
     print_table(hh_result, 'HeadHunter Moscow')
 
