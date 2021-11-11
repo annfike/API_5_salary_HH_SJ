@@ -69,6 +69,8 @@ def get_language_vacancies_statistics_hh(language):
             page += 1
             if page > pages_number:
                 break
+        else:
+            break
     vacancies_number = vacancies['found']
     salaries = [predict_rub_salary_hh(vacancy) for vacancy in language_vacancies]
     salaries = [int(salary) for salary in salaries if salary]
@@ -120,6 +122,8 @@ def get_language_vacancies_statistics_sj(language, token):
             page += 1
             if not vacancies['more']:
                 break
+        else:
+            break
     vacancies_number = vacancies['total']
     salaries = [predict_rub_salary_sj(vacancy) for vacancy in language_vacancies]
     salaries = [int(salary) for salary in salaries if salary]
