@@ -1,5 +1,5 @@
 import os
-from statistics import mean 
+from statistics import mean
 
 import requests
 from dotenv import load_dotenv
@@ -14,10 +14,10 @@ def predict_rub_salary(salary_from, salary_to):
     else:
         salary = (salary_from + salary_to) / 2
     return salary
-    
+
 
 def predict_rub_salary_hh(vacancy):
-    salary_delta = vacancy['salary'] 
+    salary_delta = vacancy['salary']
     if not salary_delta or salary_delta['currency'] != 'RUR':
         return None
     else:
@@ -28,7 +28,8 @@ def predict_rub_salary_hh(vacancy):
 
 
 def predict_rub_salary_sj(vacancy):
-    if not vacancy['payment_from'] and not vacancy['payment_to'] or vacancy['currency'] != 'rub':
+    if not vacancy['payment_from'] and not vacancy['payment_to'] \
+                                   or vacancy['currency'] != 'rub':
         return None
     else:
         salary_from = vacancy['payment_from']
@@ -40,16 +41,17 @@ def predict_rub_salary_sj(vacancy):
 def get_vacancies_hh(language, page, area, period):
     url = 'https://api.hh.ru/vacancies'
     headers = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'\
-        '(KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)\
+        AppleWebKit/537.36 (KHTML, like Gecko)\
+        Chrome/80.0.3987.149 Safari/537.36',
         'accept': '*/*'
         }
     payload = {
         'text': f'Программист {language}',
         'area': area,
         'period': period,
-        'page': page, 
-        } 
+        'page': page,
+        }
     response = requests.get(url, headers=headers, params=payload)
     response.raise_for_status()
     response = response.json()
@@ -78,7 +80,9 @@ def get_language_vacancies_statistics_hh(language):
 def get_languages_vacancies_statistics_hh(languages):
     languages_vacancies_statistics = {}
     for language in languages:
-        vacancies_number, average_salary, vacancies_processed = get_language_vacancies_statistics_hh(language)
+        (vacancies_number,
+        average_salary,
+        vacancies_processed) = get_language_vacancies_statistics_hh(language)
         language_vacancies_details = {
             'vacancies_found': vacancies_number,
             'average_salary': average_salary,
@@ -96,10 +100,10 @@ def get_vacancies_sj(language, page, token, area, period):
     payload = {
         'keyword': f'Программист {language}',
         'town': area,
-        'period': period, 
-        'page': page, 
-        'count': 100, 
-        } 
+        'period': period,
+        'page': page,
+        'count': 100,
+        }
     response = requests.get(url, headers=headers, params=payload)
     response.raise_for_status()
     response = response.json()
@@ -107,7 +111,7 @@ def get_vacancies_sj(language, page, token, area, period):
 
 
 def get_language_vacancies_statistics_sj(language, token):
-    language_vacancies = [] 
+    language_vacancies = []
     page = 0
     while True:
         vacancies = get_vacancies_sj(language, page, token, area='Москва', period=0)
@@ -122,12 +126,14 @@ def get_language_vacancies_statistics_sj(language, token):
     average_salary = int(mean(salaries))
     vacancies_processed = len(salaries)
     return vacancies_number, average_salary, vacancies_processed
-  
+
 
 def get_languages_vacancies_statistics_sj(languages, token):
     languages_vacancies_statistics = {}
     for language in languages:
-        vacancies_number, average_salary, vacancies_processed = get_language_vacancies_statistics_sj(language, token)
+        (vacancies_number,
+        average_salary,
+        vacancies_processed) = get_language_vacancies_statistics_sj(language, token)
         language_vacancies_details = {
             'vacancies_found': vacancies_number,
             'average_salary': average_salary,
@@ -138,9 +144,18 @@ def get_languages_vacancies_statistics_sj(languages, token):
 
 
 def get_table(result, title):
-    table = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
+    table = [
+        ['Язык программирования',
+        'Вакансий найдено',
+        'Вакансий обработано',
+        'Средняя зарплата']
+        ]
     for language, details in result.items():
-        row = [language, details['vacancies_found'], details['vacancies_processed'], details['average_salary']]
+        row = [language,
+            details['vacancies_found'],
+            details['vacancies_processed'],
+            details['average_salary']
+            ]
         table.append(row)
         row = []
     table = AsciiTable(table)
@@ -148,11 +163,17 @@ def get_table(result, title):
     return table.table
 
 
-
 def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_TOKEN')
-    languages = ['Python', 'JavaScript', 'Java', 'Ruby', 'PHP', 'C++', 'C#', 'C', 'Go']
+    languages = ['Python',
+        'JavaScript',
+        'Java', 'Ruby',
+        'PHP',
+        'C++',
+        'C#',
+        'C',
+        'Go']
     sj_result = get_languages_vacancies_statistics_sj(languages, token)
     hh_result = get_languages_vacancies_statistics_hh(languages)
     print(get_table(sj_result, 'SuperJob Moscow'))
