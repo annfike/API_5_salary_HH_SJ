@@ -137,7 +137,7 @@ def get_languages_vacancies_statistics_sj(languages, token):
     return languages_vacancies_statistics
 
 
-def print_table(result, title):
+def get_table(result, title):
     table = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     for language, details in result.items():
         row = [language, details['vacancies_found'], details['vacancies_processed'], details['average_salary']]
@@ -145,7 +145,7 @@ def print_table(result, title):
         row = []
     table = AsciiTable(table)
     table.title = title
-    print(table.table)
+    return table.table
 
 
 
@@ -155,8 +155,8 @@ def main():
     languages = ['Python', 'JavaScript', 'Java', 'Ruby', 'PHP', 'C++', 'C#', 'C', 'Go']
     sj_result = get_languages_vacancies_statistics_sj(languages, token)
     hh_result = get_languages_vacancies_statistics_hh(languages)
-    print_table(sj_result, 'SuperJob Moscow')
-    print_table(hh_result, 'HeadHunter Moscow')
+    print(get_table(sj_result, 'SuperJob Moscow'))
+    print(get_table(hh_result, 'HeadHunter Moscow'))
 
 
 if __name__ == '__main__':
