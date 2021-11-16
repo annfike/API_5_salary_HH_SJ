@@ -20,10 +20,9 @@ def predict_rub_salary_hh(vacancy):
     salary_delta = vacancy['salary']
     if not salary_delta or salary_delta['currency'] != 'RUR':
         return None
-    else:
-        salary_from = salary_delta['from']
-        salary_to = salary_delta['to']
-        salary = predict_rub_salary(salary_from, salary_to)
+    salary_from = salary_delta['from']
+    salary_to = salary_delta['to']
+    salary = predict_rub_salary(salary_from, salary_to)
     return salary
 
 
@@ -31,10 +30,9 @@ def predict_rub_salary_sj(vacancy):
     if not vacancy['payment_from'] and not vacancy['payment_to'] \
                                    or vacancy['currency'] != 'rub':
         return None
-    else:
-        salary_from = vacancy['payment_from']
-        salary_to = vacancy['payment_to']
-        salary = predict_rub_salary(salary_from, salary_to)
+    salary_from = vacancy['payment_from']
+    salary_to = vacancy['payment_to']
+    salary = predict_rub_salary(salary_from, salary_to)
     return salary
 
 
