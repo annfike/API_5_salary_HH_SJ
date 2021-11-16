@@ -28,7 +28,7 @@ def predict_rub_salary_hh(vacancy):
 
 def predict_rub_salary_sj(vacancy):
     if not vacancy['payment_from'] and not vacancy['payment_to'] \
-                                   or vacancy['currency'] != 'rub':
+            or vacancy['currency'] != 'rub':
         return None
     salary_from = vacancy['payment_from']
     salary_to = vacancy['payment_to']
@@ -80,9 +80,8 @@ def get_language_vacancies_statistics_hh(language):
 def get_languages_vacancies_statistics_hh(languages):
     languages_vacancies_statistics = {}
     for language in languages:
-        (vacancies_number,
-        average_salary,
-        vacancies_processed) = get_language_vacancies_statistics_hh(language)
+        vacancies_number, average_salary, vacancies_processed = \
+            get_language_vacancies_statistics_hh(language)
         language_vacancies_details = {
             'vacancies_found': vacancies_number,
             'average_salary': average_salary,
@@ -133,9 +132,8 @@ def get_language_vacancies_statistics_sj(language, token):
 def get_languages_vacancies_statistics_sj(languages, token):
     languages_vacancies_statistics = {}
     for language in languages:
-        (vacancies_number,
-        average_salary,
-        vacancies_processed) = get_language_vacancies_statistics_sj(language, token)
+        vacancies_number, average_salary, vacancies_processed = \
+            get_language_vacancies_statistics_hh(language, token)
         language_vacancies_details = {
             'vacancies_found': vacancies_number,
             'average_salary': average_salary,
@@ -150,14 +148,15 @@ def get_table(result, title):
         ['Язык программирования',
         'Вакансий найдено',
         'Вакансий обработано',
-        'Средняя зарплата']
-        ]
+        'Средняя зарплата',]
+    ]
     for language, details in result.items():
-        row = [language,
+        row = [
+            language,
             details['vacancies_found'],
             details['vacancies_processed'],
-            details['average_salary']
-            ]
+            details['average_salary'],
+        ]
         table.append(row)
         row = []
     table = AsciiTable(table)
@@ -168,14 +167,16 @@ def get_table(result, title):
 def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_TOKEN')
-    languages = ['Python',
+    languages = [
+        'Python',
         'JavaScript',
         'Java', 'Ruby',
         'PHP',
         'C++',
         'C#',
         'C',
-        'Go']
+        'Go',
+    ]
     sj_result = get_languages_vacancies_statistics_sj(languages, token)
     hh_result = get_languages_vacancies_statistics_hh(languages)
     print(get_table(sj_result, 'SuperJob Moscow'))
