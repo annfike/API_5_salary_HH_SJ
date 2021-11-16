@@ -152,7 +152,6 @@ def get_table(result, title):
             details['average_salary'],
         ]
         table.append(row)
-        row = []
     table = AsciiTable(table)
     table.title = title
     return table.table
@@ -171,10 +170,10 @@ def main():
         'C',
         'Go',
     ]
-    sj_result = get_languages_vacancies_statistics_sj(languages, token)
-    hh_result = get_languages_vacancies_statistics_hh(languages)
-    print(get_table(sj_result, 'SuperJob Moscow'))
-    print(get_table(hh_result, 'HeadHunter Moscow'))
+    sj_statistics = get_languages_vacancies_statistics_sj(languages, token)
+    hh_statistics = get_languages_vacancies_statistics_hh(languages)
+    print(get_table(sj_statistics, 'SuperJob Moscow'))
+    print(get_table(hh_statistics, 'HeadHunter Moscow'))
 
 
 if __name__ == '__main__':
