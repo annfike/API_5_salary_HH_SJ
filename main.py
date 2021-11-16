@@ -61,14 +61,11 @@ def get_language_vacancies_statistics_hh(language):
     page = 0
     while True:
         vacancies = get_vacancies_hh(language, page, area=1, period=3)
-        if vacancies:
-            pages_number = vacancies['pages']
-            language_vacancies.extend(vacancies['items'])
-            page += 1
-            if page > pages_number:
-                break
-        else:
+        pages_number = vacancies['pages']
+        if page == pages_number:
             break
+        language_vacancies.extend(vacancies['items'])
+        page += 1
     vacancies_number = vacancies['found']
     salaries = [predict_rub_salary_hh(vacancy) for vacancy in language_vacancies]
     salaries = [int(salary) for salary in salaries if salary]
@@ -114,12 +111,9 @@ def get_language_vacancies_statistics_sj(language, token):
     page = 0
     while True:
         vacancies = get_vacancies_sj(language, page, token, area='Москва', period=0)
-        if vacancies:
-            language_vacancies.extend(vacancies['objects'])
-            page += 1
-            if not vacancies['more']:
-                break
-        else:
+        language_vacancies.extend(vacancies['objects'])
+        page += 1
+        if not vacancies['more']:
             break
     vacancies_number = vacancies['total']
     salaries = [predict_rub_salary_sj(vacancy) for vacancy in language_vacancies]
@@ -133,7 +127,7 @@ def get_languages_vacancies_statistics_sj(languages, token):
     languages_vacancies_statistics = {}
     for language in languages:
         vacancies_number, average_salary, vacancies_processed = \
-            get_language_vacancies_statistics_hh(language, token)
+            get_language_vacancies_statistics_sj(language, token)
         language_vacancies_details = {
             'vacancies_found': vacancies_number,
             'average_salary': average_salary,
