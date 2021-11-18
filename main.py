@@ -62,9 +62,9 @@ def get_language_vacancies_statistics_hh(language):
     while True:
         vacancies = get_vacancies_hh(language, page, area=1, period=3)
         pages_number = vacancies['pages']
-        if page == pages_number:
-            break
         language_vacancies.extend(vacancies['items'])
+        if page == pages_number - 1:
+            break
         page += 1
     vacancies_number = vacancies['found']
     salaries = [predict_rub_salary_hh(vacancy) for vacancy in language_vacancies]
@@ -137,14 +137,14 @@ def get_languages_vacancies_statistics_sj(languages, token):
     return languages_vacancies_statistics
 
 
-def get_table(result, title):
+def get_table(statistics, title):
     table = [
         ['Язык программирования',
         'Вакансий найдено',
         'Вакансий обработано',
         'Средняя зарплата',]
     ]
-    for language, details in result.items():
+    for language, details in statistics.items():
         row = [
             language,
             details['vacancies_found'],
